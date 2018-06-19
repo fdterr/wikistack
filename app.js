@@ -12,7 +12,6 @@ const { Page } = require('./models/index');
 
 const PORT = 3000;
 
-
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(morgan('dev'));
 
@@ -29,7 +28,7 @@ app.get('/', (req, res, next) => {
 
 // initialize the app by syncing databases then listen on PORT
 const init = async () => {
-  await models.db.sync();
+  await models.db.sync({ force: true });
   app.listen(PORT, () => {
     console.log(`listening on port ${PORT}...`);
   });

@@ -1,23 +1,20 @@
-
 const express = require('express');
 const router = express.Router();
 const { main, addPage, editPage, wikiPage } = require('../views');
 const { Page } = require('../models/index');
 const { User } = require('../models/index');
 
-
 // get the main page with all the pages
 router.get('/', async (req, res, next) => {
   try {
-    const pages = await Page.findAll();
-    let authors = [];
+    let pages;
+    pages = await Page.findAll();
+    console.log(pages);
     // console.log(pages);
-    pages.forEach( async (page) => {
-      const author = await User.findById(page.authorId);
-      authors.push(author.name);
-    })
-    res.send(main(pages, authors));
+    res.send(main(pages));
   } catch (error) {
+    console.log(error);
+    res.send(error.message);
     next(error);
   }
 });
@@ -28,8 +25,8 @@ router.post('/', async (req, res, next) => {
     const [author, wascreated] = await User.findOrCreate({
       where: {
         name: req.body.authorName,
-        email: req.body.email
-      }
+        email: req.body.email,
+      },
     });
 
     const page = await Page.create(req.body);
@@ -37,30 +34,27 @@ router.post('/', async (req, res, next) => {
     page.setAuthor(author);
     await page.save();
     res.redirect(`/wiki/${page.slug}`);
-
   } catch (error) {
     console.log('unable to display posts', error);
     next(error);
   }
 });
 
-
 router.post('/:slug', async (req, res, next) => {
   try {
     const [updatedRowCount, updatedPages] = await Page.update(req.body, {
       where: {
-        slug: req.params.slug
+        slug: req.params.slug,
       },
-      returning: true
+      returning: true,
     });
 
-    res.redirect(`/wiki/${updatedPages[0].slug}`)
+    res.redirect(`/wiki/${updatedPages[0].slug}`);
   } catch (error) {
     console.log('unable to make post at ' + req.params.slug);
     next(error);
   }
-
-})
+});
 
 // delete the post at this slug
 router.get('/:slug/delete', async (req, res, next) => {
@@ -68,8 +62,8 @@ router.get('/:slug/delete', async (req, res, next) => {
     // destroy the page with the slug of the request
     await Page.destroy({
       where: {
-        slug: req.params.slug
-      }
+        slug: req.params.slug,
+      },
     });
     // redirect back to main wiki page
     res.redirect('/wiki');
@@ -89,8 +83,8 @@ router.get('/:slug', async (req, res, next) => {
   try {
     const page = await Page.findOne({
       where: {
-        slug: req.params.slug
-      }
+        slug: req.params.slug,
+      },
     });
     if (!page) {
       res.sendStatus(404);
@@ -108,8 +102,8 @@ router.get('/:slug/edit', async (req, res, next) => {
   try {
     const page = await Page.findOne({
       where: {
-        slug: req.params.slug
-      }
+        slug: req.params.slug,
+      },
     });
 
     // if the page does not exist send 404, otherwise send it to the editpage
@@ -124,7 +118,6 @@ router.get('/:slug/edit', async (req, res, next) => {
     console.log('unable to get edit page for page at wiki/', req.params.slug);
     next(error);
   }
-})
-
+});
 
 module.exports = router;

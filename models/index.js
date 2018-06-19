@@ -6,12 +6,12 @@ const db = new Sequelize('postgres://localhost:5432/wikistack', {
 const Page = db.define('page', {
   title: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
   },
   slug: {
     type: Sequelize.STRING,
     allowNull: false,
-    unique: true
+    unique: true,
   },
   content: {
     type: Sequelize.TEXT,
@@ -20,9 +20,9 @@ const Page = db.define('page', {
   status: Sequelize.ENUM('open', 'closed'),
 });
 
-Page.beforeValidate((page) => {
+Page.beforeValidate(page => {
   if (!page.slug) {
-    page.slug = createSlug(page.title)
+    page.slug = createSlug(page.title);
   }
 });
 
@@ -40,11 +40,10 @@ const User = db.define('user', {
 
 Page.belongsTo(User, { as: 'author' });
 
-
 // [Title] => string with only url friendly characters
-const createSlug = (title) => {
+const createSlug = title => {
   return title.replace(/\s+/g, '_').replace(/\W/g, '');
-}
+};
 
 module.exports = {
   db,
